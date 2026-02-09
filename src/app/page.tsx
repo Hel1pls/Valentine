@@ -47,8 +47,6 @@ export default function Home() {
 					<LoveText />
 				)}
 			</div>
-
-			{started && <ConfettiLayer />}
 		</div>
 	)
 }
@@ -56,13 +54,12 @@ export default function Home() {
 function CloudLayer({ started }: { started: boolean }) {
 	return (
 		<div
-			className={`absolute bottom-0 left-0 h-105 w-full bg-no-repeat bg-bottom pointer-events-none transition-transform duration-700 ease-in-out ${
-				started ? 'translate-y-105' : 'translate-y-0'
+			className={`absolute bottom-0 left-0 h-105 w-full bg-no-repeat bg-bottom pointer-events-none transform-gpu transition-transform duration-900 ease-in-out ${
+				started ? 'translate-y-[100vh]' : 'translate-y-0'
 			}`}
 			style={{
 				backgroundImage: `url(${cloudSvg})`,
 				backgroundSize: '100% auto',
-				willChange: 'transform',
 			}}
 		/>
 	)
@@ -71,11 +68,9 @@ function CloudLayer({ started }: { started: boolean }) {
 function TopLayer({ started }: { started: boolean }) {
 	return (
 		<div
-			className={`pointer-events-none absolute top-0 left-0 w-full z-30 transition-transform duration-700 ease-in-out`}
-			style={{
-				transform: started ? 'translateY(100vh)' : 'translateY(0)',
-				willChange: 'transform',
-			}}
+			className={`pointer-events-none absolute top-0 left-0 w-full z-30 transform-gpu transition-transform duration-1000 ease-in-out ${
+				started ? 'translate-y-[100vh]' : 'translate-y-0'
+			}`}
 		>
 			{/* top cloud */}
 			<div
@@ -87,16 +82,11 @@ function TopLayer({ started }: { started: boolean }) {
 			/>
 
 			{/* gift */}
-			<div style={{ position: 'absolute', right: 378, top: 48 }}>
-				<Image
-					src={giftSvg}
-					alt='gift'
-					width={150}
-					height={150}
-					className={`${!started ? 'animate-sway' : ''}`}
-					style={{ transformOrigin: 'center top' }}
-					priority
-				/>
+			<div
+				className={`absolute right-90 top-8 ${!started ? 'animate-sway-x' : ''}`}
+				style={{ width: 120, height: 120 }}
+			>
+				<Image src={giftSvg} alt='gift' width={120} height={120} priority />
 			</div>
 		</div>
 	)
@@ -109,21 +99,16 @@ function GirlImage({ started }: { started: boolean }) {
 			alt='girl'
 			width={girlImg.width}
 			height={girlImg.height}
-			className='absolute z-0 pointer-events-none'
-			style={{
-				bottom: 150,
-				left: 80,
-				transform: started ? 'translateY(100vh)' : 'translateY(0)',
-				transition: 'transform 700ms ease-in-out',
-				willChange: 'transform',
-			}}
+			className={`absolute z-0 pointer-events-none left-20 bottom-36 transform-gpu transition-transform duration-1000 ease-in-out ${
+				started ? 'translate-y-[100vh]' : 'translate-y-0'
+			}`}
 			priority
 		/>
 	)
 }
 
 function LoveText() {
-	const text = 'Варя я люблю тебя ❤️'
+	const text = 'Игра на выживание?'
 
 	return (
 		<h1 className='text-5xl font-bold text-red-500 tracking-wide'>
@@ -137,23 +122,5 @@ function LoveText() {
 				</span>
 			))}
 		</h1>
-	)
-}
-
-const confetti = Array.from({ length: 24 })
-
-function ConfettiLayer() {
-	return (
-		<div className='pointer-events-none absolute inset-0'>
-			{confetti.map((_, i) => (
-				<span
-					key={i}
-					className='absolute top-0 animate-confetti text-red-400'
-					style={{ left: `${(i + 1) * 4}%` }}
-				>
-					❤
-				</span>
-			))}
-		</div>
 	)
 }

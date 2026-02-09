@@ -32,17 +32,6 @@
 	animation: balloon-bob 5s ease-in-out infinite;
 }
 
-/* Немного разнообразия для конфетти - размеры */
-.confetti-small {
-	font-size: 0.6rem;
-}
-.confetti-medium {
-	font-size: 0.9rem;
-}
-.confetti-large {
-	font-size: 1.4rem;
-}
-
 /* Буквы появляются с низу */
 @keyframes letter {
 	from {
@@ -58,22 +47,6 @@
 .animate-letter {
 	opacity: 0;
 	animation: letter 0.5s forwards;
-}
-
-/* Падающее конфетти */
-@keyframes confetti {
-	from {
-		transform: translateY(-10px);
-		opacity: 1;
-	}
-	to {
-		transform: translateY(100vh);
-		opacity: 0;
-	}
-}
-
-.animate-confetti {
-	animation: confetti 3s linear infinite;
 }
 
 /* Вспомогательные классы для delay */
@@ -93,20 +66,23 @@
 	animation-delay: 0.7s;
 }
 
-/* Плавное покачивание (подарок) */
-@keyframes sway {
+/* Плавное горизонтальное покачивание (подарок) */
+@keyframes sway-x {
 	0% {
-		transform: rotate(-6deg);
+		transform: translateX(0);
 	}
-	50% {
-		transform: rotate(6deg);
+	25% {
+		transform: translateX(-10px);
+	}
+	75% {
+		transform: translateX(10px);
 	}
 	100% {
-		transform: rotate(-6deg);
+		transform: translateX(0);
 	}
 }
 
-.animate-sway {
-	animation: sway 2s ease-in-out infinite;
-	transform-origin: center top;
+.animate-sway-x {
+	animation: sway-x 2s ease-in-out infinite;
+	will-change: transform;
 }
