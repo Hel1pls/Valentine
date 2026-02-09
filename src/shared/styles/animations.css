@@ -1,0 +1,66 @@
+/* Плавающие шарики */
+@keyframes float {
+	0% {
+		transform: translateY(0);
+	}
+	50% {
+		transform: translateY(-20px);
+	}
+	100% {
+		transform: translateY(0);
+	}
+}
+
+.animate-float {
+	animation: float 6s ease-in-out infinite;
+}
+
+/* Буквы появляются с низу */
+@keyframes letter {
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.animate-letter {
+	opacity: 0;
+	animation: letter 0.5s forwards;
+}
+
+/* Падающее конфетти */
+@keyframes confetti {
+	from {
+		transform: translateY(-10px);
+		opacity: 1;
+	}
+	to {
+		transform: translateY(100vh);
+		opacity: 0;
+	}
+}
+
+.animate-confetti {
+	animation: confetti 3s linear infinite;
+}
+
+/* Вспомогательные классы для delay */
+.delay-0 {
+	animation-delay: 0s;
+}
+
+.delay-200 {
+	animation-delay: 0.2s;
+}
+
+.delay-500 {
+	animation-delay: 0.5s;
+}
+
+.delay-700 {
+	animation-delay: 0.7s;
+}
