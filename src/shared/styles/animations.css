@@ -15,6 +15,34 @@
 	animation: float 6s ease-in-out infinite;
 }
 
+/* Более живое движение для шариков */
+@keyframes balloon-bob {
+	0% {
+		transform: translateY(0) rotate(-4deg) scale(1);
+	}
+	50% {
+		transform: translateY(-26px) rotate(4deg) scale(1.03);
+	}
+	100% {
+		transform: translateY(0) rotate(-4deg) scale(1);
+	}
+}
+
+.animate-balloon {
+	animation: balloon-bob 5s ease-in-out infinite;
+}
+
+/* Немного разнообразия для конфетти - размеры */
+.confetti-small {
+	font-size: 0.6rem;
+}
+.confetti-medium {
+	font-size: 0.9rem;
+}
+.confetti-large {
+	font-size: 1.4rem;
+}
+
 /* Буквы появляются с низу */
 @keyframes letter {
 	from {
