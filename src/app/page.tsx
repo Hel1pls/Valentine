@@ -1,6 +1,16 @@
 'use client'
 
 import { useRef, useState } from 'react'
+import Image from 'next/image'
+import girlImg from '@/shared/assets/img/girl1.png'
+
+const loveMp3 = new URL('../shared/assets/audio/love.mp3', import.meta.url).href
+const cloudSvg = new URL('../shared/assets/svg/Cloud.svg', import.meta.url).href
+const topCloudSvg = new URL(
+	'../shared/assets/svg/Top_Cloud.svg',
+	import.meta.url,
+).href
+const giftSvg = new URL('../shared/assets/svg/gift.svg', import.meta.url).href
 
 export default function Home() {
 	const [started, setStarted] = useState(false)
@@ -13,13 +23,16 @@ export default function Home() {
 
 	return (
 		<div className='fixed inset-0 bg-pink-200 overflow-hidden'>
-			<audio ref={audioRef} src='/love.mp3' />
+			<audio ref={audioRef} src={loveMp3} />
 
-			{/* BACKGROUND */}
-			<CloudLayer />
+			{/* TOP LAYER: cloud + gift */}
+			<TopLayer started={started} />
 
-			{/* DECOR
-			{/* <BalloonLayer /> */} 
+			{/* GIRL IMAGE (ниже облаков) */}
+			<GirlImage started={started} />
+
+			{/* BACKGROUND CLOUDS */}
+			<CloudLayer started={started} />
 
 			{/* CENTER */}
 			<div className='relative z-10 flex h-full items-center justify-center'>
@@ -40,68 +53,77 @@ export default function Home() {
 	)
 }
 
-function CloudLayer() {
+function CloudLayer({ started }: { started: boolean }) {
 	return (
-		<>
-			<CloudRow top />
-			<CloudRow />
-		</>
+		<div
+			className={`absolute bottom-0 left-0 h-105 w-full bg-no-repeat bg-bottom pointer-events-none transition-transform duration-700 ease-in-out ${
+				started ? 'translate-y-105' : 'translate-y-0'
+			}`}
+			style={{
+				backgroundImage: `url(${cloudSvg})`,
+				backgroundSize: '100% auto',
+				willChange: 'transform',
+			}}
+		/>
 	)
 }
 
-function CloudRow({ top }: { top?: boolean }) {
-	if (!top) {
-		return (
+function TopLayer({ started }: { started: boolean }) {
+	return (
+		<div
+			className={`pointer-events-none absolute top-0 left-0 w-full z-30 transition-transform duration-700 ease-in-out`}
+			style={{
+				transform: started ? 'translateY(100vh)' : 'translateY(0)',
+				willChange: 'transform',
+			}}
+		>
+			{/* top cloud */}
 			<div
-				className='absolute bottom-0 left-0 w-screen h-105
-				 bg-no-repeat bg-bottom bg-cover pointer-events-none'
-				style={{ backgroundImage: `url('/cloud.svg')` }}
+				className='w-full h-58 bg-no-repeat bg-top mt-5'
+				style={{
+					backgroundImage: `url(${topCloudSvg})`,
+					backgroundSize: '100% auto',
+				}}
 			/>
-		)
-	}
 
-	return (
-		<div className={`absolute top-0 left-0 w-full flex justify-between px-24`}>
-			<Cloud />
-			<Cloud large />
-			<Cloud />
-		</div>
-	)
-}
-
-function Cloud({ large }: { large?: boolean }) {
-	return (
-		<div className={`relative ${large ? 'w-80 h-40' : 'w-64 h-32'}`}>
-			<div className='absolute bottom-0 left-0 w-28 h-28 bg-white rounded-full' />
-			<div className='absolute bottom-0 left-20 w-40 h-40 bg-white rounded-full' />
-			<div className='absolute bottom-0 left-50 w-24 h-24 bg-white rounded-full' />
-		</div>
-	)
-}
-
-function BalloonLayer() {
-	return (
-		<>
-			<Balloon x='20%' y='30%' />
-			<Balloon x='80%' y='28%' />
-			<Balloon x='30%' y='65%' />
-			<Balloon x='70%' y='62%' />
-		</>
-	)
-}
-
-function Balloon({ x, y }: { x: string; y: string }) {
-	return (
-		<div className='absolute animate-balloon' style={{ left: x, top: y }}>
-			<div className='relative'>
-				<div className='text-5xl text-red-400'>❤</div>
+			{/* gift */}
+			<div style={{ position: 'absolute', right: 378, top: 48 }}>
+				<Image
+					src={giftSvg}
+					alt='gift'
+					width={150}
+					height={150}
+					className={`${!started ? 'animate-sway' : ''}`}
+					style={{ transformOrigin: 'center top' }}
+					priority
+				/>
 			</div>
 		</div>
 	)
 }
 
+function GirlImage({ started }: { started: boolean }) {
+	return (
+		<Image
+			src={girlImg}
+			alt='girl'
+			width={girlImg.width}
+			height={girlImg.height}
+			className='absolute z-0 pointer-events-none'
+			style={{
+				bottom: 150,
+				left: 80,
+				transform: started ? 'translateY(100vh)' : 'translateY(0)',
+				transition: 'transform 700ms ease-in-out',
+				willChange: 'transform',
+			}}
+			priority
+		/>
+	)
+}
+
 function LoveText() {
-	const text = 'VARVARA, I LOVE YOU ❤️'
+	const text = 'Варя я люблю тебя ❤️'
 
 	return (
 		<h1 className='text-5xl font-bold text-red-500 tracking-wide'>
@@ -117,6 +139,7 @@ function LoveText() {
 		</h1>
 	)
 }
+
 const confetti = Array.from({ length: 24 })
 
 function ConfettiLayer() {

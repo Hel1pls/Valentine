@@ -92,3 +92,21 @@
 .delay-700 {
 	animation-delay: 0.7s;
 }
+
+/* Плавное покачивание (подарок) */
+@keyframes sway {
+	0% {
+		transform: rotate(-6deg);
+	}
+	50% {
+		transform: rotate(6deg);
+	}
+	100% {
+		transform: rotate(-6deg);
+	}
+}
+
+.animate-sway {
+	animation: sway 2s ease-in-out infinite;
+	transform-origin: center top;
+}
