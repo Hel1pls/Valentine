@@ -1,23 +1,39 @@
-@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&display=swap');
+@import 'tailwindcss';
 
-
+/* Comfortaa utility */
+.font-comfortaa {
+	font-family: 'Comfortaa', cursive;
+	font-weight: 700;
+}
 
 @keyframes letter {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+	from {
+		opacity: 0;
+		transform: translateY(12px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
 
 .animate-letter {
-  opacity: 0;
-  animation: letter 0.4s forwards;
+	opacity: 0;
+	animation: letter 0.4s forwards;
 }
 
 @keyframes confetti {
-  from { transform: translateY(-10px); opacity: 1; }
-  to { transform: translateY(100vh); opacity: 0; }
+	from {
+		transform: translateY(-10px);
+		opacity: 1;
+	}
+	to {
+		transform: translateY(100vh);
+		opacity: 0;
+	}
 }
 
 .animate-confetti {
-  animation: confetti 3s linear infinite;
+	animation: confetti 3s linear infinite;
 }
-
