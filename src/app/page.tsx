@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 
@@ -19,6 +19,113 @@ const topCloud = new URL('../shared/assets/svg/Top_Cloud.svg', import.meta.url)
 
 const loveMp3 = new URL('../shared/assets/audio/love.mp3', import.meta.url).href
 const ease = [0.22, 1, 0.36, 1] as const
+
+const quiz = [
+	{
+		question:
+			'Сколько матов было написано и произнесено за первый час нашего общения?',
+		options: [
+			{ text: '30', correct: true },
+			{ text: '47', correct: false },
+			{ text: '13', correct: false },
+			{ text: '24', correct: false },
+		],
+	},
+	{
+		question: 'В каком месяце мы впервые встретились?',
+		options: [
+			{ text: 'Январь', correct: false },
+			{ text: 'Февраль', correct: true },
+			{ text: 'Март', correct: false },
+			{ text: 'Апрель', correct: false },
+		],
+	},
+	{
+		question: 'Какой у меня любимый цвет?',
+		options: [
+			{ text: 'Красный', correct: true },
+			{ text: 'Зелёный', correct: false },
+			{ text: 'Синий', correct: false },
+			{ text: 'Жёлтый', correct: false },
+		],
+	},
+	{
+		question: 'Как зовут моего(ей) любимого питомца?',
+		options: [
+			{ text: 'Кот', correct: false },
+			{ text: 'Пёс', correct: false },
+			{ text: 'Саша', correct: true },
+			{ text: 'Рыбка', correct: false },
+		],
+	},
+	{
+		question: 'Сколько раз мы смотрели фильм вместе?',
+		options: [
+			{ text: '1', correct: false },
+			{ text: '3', correct: true },
+			{ text: '5', correct: false },
+			{ text: '0', correct: false },
+		],
+	},
+	{
+		question: 'Какой мой любимый десерт?',
+		options: [
+			{ text: 'Шоколадный торт', correct: true },
+			{ text: 'Мороженое', correct: false },
+			{ text: 'Пирожные', correct: false },
+			{ text: 'Фрукты', correct: false },
+		],
+	},
+	{
+		question: 'Куда мы ездили в последнее мини-путешествие?',
+		options: [
+			{ text: 'Горы', correct: true },
+			{ text: 'Пляж', correct: false },
+			{ text: 'Город', correct: false },
+			{ text: 'Озеро', correct: false },
+		],
+	},
+	{
+		question: 'Какой жанр фильма мы предпочитаем смотреть вместе?',
+		options: [
+			{ text: 'Комедия', correct: false },
+			{ text: 'Драма', correct: true },
+			{ text: 'Хоррор', correct: false },
+			{ text: 'Мультфильм', correct: false },
+		],
+	},
+	{
+		question: 'Сколько звонков я сделал(а) тебе в тот день?',
+		options: [
+			{ text: '2', correct: false },
+			{ text: '7', correct: true },
+			{ text: '10', correct: false },
+			{ text: '0', correct: false },
+		],
+	},
+	{
+		question: 'Какой подарок я обещал(а) за правильные ответы?',
+		options: [
+			{ text: 'Поцелуй', correct: false },
+			{ text: 'Обещанный приз', correct: true },
+			{ text: 'Пицца', correct: false },
+			{ text: 'Книга', correct: false },
+		],
+	},
+]
+
+const successPhrases = [
+	'Умница!',
+	'Милашка',
+	'Юху🎉',
+	'Целую твою жопку',
+]
+const failPhrases = [
+	'Ты че дурында? :(',
+	'Варя...',
+	'Ну ты и лошара',
+	'Дурочка',
+]
 
 export default function Page() {
 	const [scene, setScene] = useState<'intro' | 'game'>('intro')
@@ -121,45 +228,22 @@ function GameScene() {
 	)
 	const [feedbackMessage, setFeedbackMessage] = useState<string>('')
 
-	const quiz = [
-		{
-			question:
-				'Сколько матов было написано и произнесено за первый час нашего общения?',
-			options: [
-				{ text: '30', correct: true },
-				{ text: '47', correct: false },
-				{ text: '13', correct: false },
-				{ text: '24', correct: false },
-			],
-		},
-		// добавляй сюда новые вопросы в том же формате
-	]
+	// quiz is defined at module scope now
 
 	const current = quiz[currentQuestionIndex]
 
-	const successPhrases = [
-		'Отлично!',
-		'Молодец, так держать!',
-		'Победитель! 🎉',
-		'Ты прав!',
-	]
-	const failPhrases = [
-		'Ох...',
-		'Упс, не повезло.',
-		'В следующий раз повезёт.',
-		'Неправильно :(',
-	]
+	// phrases moved to module scope
 
 	const handleOpenQuiz = () => setShowQuestion(true)
-	const handleAnswer = (i: number) => {
+	const handleAnswer = useCallback((i: number) => {
 		// ignore repeated clicks
 		if (selectedAnswer !== null) return
 		setSelectedAnswer(i)
 
-		const chosen = current.options[i]
+		const chosen = quiz[currentQuestionIndex].options[i]
 		const correct = !!chosen.correct
 
-		// choose random phrase
+		// choose random phrase (executed on click)
 		const phrases = correct ? successPhrases : failPhrases
 		const message = phrases[Math.floor(Math.random() * phrases.length)]
 
@@ -173,7 +257,7 @@ function GameScene() {
 			const raw = localStorage.getItem(key)
 			const list = raw ? JSON.parse(raw) : []
 			list.push({
-				question: current.question,
+				question: quiz[currentQuestionIndex].question,
 				chosen: chosen.text,
 				correct,
 				timestamp: Date.now(),
@@ -190,7 +274,7 @@ function GameScene() {
 			// move to next question if available
 			setCurrentQuestionIndex(idx => (idx + 1 < quiz.length ? idx + 1 : idx))
 		}, 1400)
-	}
+	}, [selectedAnswer, currentQuestionIndex])
 
 	return (
 		<motion.div
@@ -248,7 +332,7 @@ function GameScene() {
 				className='absolute left-1/2 top-20 transform -translate-x-1/2 z-30 w-180'
 			>
 				{!showQuestion ? (
-					<div className='rounded-3xl bg-red-400 h-140 pt-10 mt-15 text-white shadow-2xl text-center w-lg mx-auto relative'>
+					<div className='rounded-3xl bg-red-400 h-135 pt-10 mt-15 text-white shadow-2xl text-center w-lg mx-auto relative'>
 						<p className='text-2xl leading-relaxed mx-auto font-bold w-4/5'>
 							Если ответишь правильно на 10 вопросов, получишь обещанный приз.
 							<br />
@@ -273,11 +357,11 @@ function GameScene() {
 						</motion.div>
 					</div>
 				) : (
-					<div className='rounded-3xl bg-red-400 h-140 pt-10 mt-15 text-white shadow-2xl text-center w-lg mx-auto relative'>
+					<div className='rounded-3xl bg-red-400 h-135 pt-10 mt-15 text-white shadow-2xl text-center w-lg mx-auto relative'>
 						<p className='text-2xl leading-relaxed mx-auto font-bold w-4/5'>
 							{current.question}
 						</p>
-						<div className='mt-6 flex flex-col items-center space-y-4 px-6'>
+						<div className='mt-14 flex flex-col items-center space-y-4 px-8'>
 							{current.options.map((opt, i) => (
 								<motion.button
 									key={i}
@@ -291,13 +375,13 @@ function GameScene() {
 							))}
 						</div>
 						{showFeedback && (
-							<div className='absolute inset-0 bg-black/40 rounded-3xl flex flex-col items-center justify-center z-40 p-4'>
+							<div className='absolute inset-0 bg-red-400 rounded-3xl flex flex-col items-center justify-center z-50 p-4'>
 								{feedbackType === 'success' ? (
 									<Image src={icon10} alt='success' width={96} height={96} />
 								) : (
 									<Image src={gif19} alt='fail' width={120} height={120} />
 								)}
-								<p className='mt-4 text-xl font-bold text-white'>
+								<p className='mt-4 text-2xl font-extrabold text-white'>
 									{feedbackMessage}
 								</p>
 							</div>
