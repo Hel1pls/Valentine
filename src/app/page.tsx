@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import Image from 'next/image'
+import Image, { type StaticImageData } from 'next/image' 
 
 // assets
 import giftSvg from '@/shared/assets/svg/gift.svg'
@@ -12,13 +12,25 @@ import centerGif from '@/shared/assets/gif/7.gif'
 import rightGif from '@/shared/assets/gif/9.gif'
 import icon10 from '@/shared/assets/gif/10.gif'
 import gif19 from '@/shared/assets/gif/19.gif'
+import gif1 from '@/shared/assets/gif/1.gif'
+import gif4 from '@/shared/assets/gif/4.gif'
+import gif5 from '@/shared/assets/gif/5.gif'
+import gif7 from '@/shared/assets/gif/7.gif'
+import gif11 from '@/shared/assets/gif/11.gif'
+import gif13 from '@/shared/assets/gif/13.gif'
+import gif14 from '@/shared/assets/gif/14.gif'
+import gif15 from '@/shared/assets/gif/15.gif'
+import gif16 from '@/shared/assets/gif/16.gif'
 
 const cloudSvg = new URL('../shared/assets/svg/Cloud.svg', import.meta.url).href
 const topCloud = new URL('../shared/assets/svg/Top_Cloud.svg', import.meta.url)
 	.href
 
 const loveMp3 = new URL('../shared/assets/audio/love.mp3', import.meta.url).href
+const successMp3 = new URL('../shared/assets/audio/success.mp3', import.meta.url).href
+const failMp3 = new URL('../shared/assets/audio/fail.mp3', import.meta.url).href
 const ease = [0.22, 1, 0.36, 1] as const
+const FEEDBACK_DURATION = 3000
 
 const quiz = [
 	{
@@ -32,16 +44,16 @@ const quiz = [
 		],
 	},
 	{
-		question: 'В каком месяце мы впервые встретились?',
+		question: 'Какого числа я бухой тебе написал?',
 		options: [
-			{ text: 'Январь', correct: false },
-			{ text: 'Февраль', correct: true },
-			{ text: 'Март', correct: false },
-			{ text: 'Апрель', correct: false },
+			{ text: '19', correct: true },
+			{ text: '22', correct: false },
+			{ text: '7', correct: false },
+			{ text: '13', correct: false },
 		],
 	},
 	{
-		question: 'Какой у меня любимый цвет?',
+		question: 'Какой у меня любимый цвет? (Не в одежде)',
 		options: [
 			{ text: 'Красный', correct: true },
 			{ text: 'Зелёный', correct: false },
@@ -50,66 +62,66 @@ const quiz = [
 		],
 	},
 	{
-		question: 'Как зовут моего(ей) любимого питомца?',
+		question: 'Что я сделал когда мы впервые встретились?',
 		options: [
-			{ text: 'Кот', correct: false },
-			{ text: 'Пёс', correct: false },
-			{ text: 'Саша', correct: true },
-			{ text: 'Рыбка', correct: false },
+			{ text: 'Въебал', correct: false },
+			{ text: 'Опоздал', correct: false },
+			{ text: 'Напугал', correct: true },
+			{ text: 'Пошутил', correct: false },
 		],
 	},
 	{
-		question: 'Сколько раз мы смотрели фильм вместе?',
+		question: 'Столица австралии?',
 		options: [
-			{ text: '1', correct: false },
-			{ text: '3', correct: true },
-			{ text: '5', correct: false },
-			{ text: '0', correct: false },
+			{ text: 'Сидней', correct: false },
+			{ text: 'Мельбурн', correct: false },
+			{ text: 'Канберра', correct: true },
+			{ text: 'Брисбен', correct: false },
 		],
 	},
 	{
-		question: 'Какой мой любимый десерт?',
+		question: 'Отмена крепостного права?',
 		options: [
-			{ text: 'Шоколадный торт', correct: true },
-			{ text: 'Мороженое', correct: false },
-			{ text: 'Пирожные', correct: false },
-			{ text: 'Фрукты', correct: false },
+			{ text: '1855', correct: false },
+			{ text: '1870', correct: false },
+			{ text: '1865', correct: false },
+			{ text: '1861', correct: true },
 		],
 	},
 	{
-		question: 'Куда мы ездили в последнее мини-путешествие?',
+		question: 'Что из этого я люблю больше?',
 		options: [
-			{ text: 'Горы', correct: true },
-			{ text: 'Пляж', correct: false },
-			{ text: 'Город', correct: false },
-			{ text: 'Озеро', correct: false },
+			{ text: 'Сиси', correct: false },
+			{ text: 'Попа', correct: true },
+			{ text: 'Тити', correct: false },
+			{ text: 'Душа', correct: false },
 		],
 	},
 	{
-		question: 'Какой жанр фильма мы предпочитаем смотреть вместе?',
+		question: 'Столица Африки?',
 		options: [
-			{ text: 'Комедия', correct: false },
-			{ text: 'Драма', correct: true },
-			{ text: 'Хоррор', correct: false },
-			{ text: 'Мультфильм', correct: false },
+			{ text: 'Каир', correct: false },
+			{ text: 'Лагос', correct: false },
+			{ text: 'Киншаса', correct: false },
+			{ text: 'Долбаеб', correct: true },
 		],
 	},
 	{
-		question: 'Сколько звонков я сделал(а) тебе в тот день?',
+		question: 'Сколько?',
 		options: [
-			{ text: '2', correct: false },
-			{ text: '7', correct: true },
-			{ text: '10', correct: false },
-			{ text: '0', correct: false },
+			{ text: 'Много', correct: true },
+			{ text: 'Дохуя', correct: true },
+			{ text: 'Пиздец', correct: true },
+			{ text: 'Ебанешься', correct: true },
 		],
 	},
 	{
 		question: 'Какой подарок я обещал(а) за правильные ответы?',
 		options: [
-			{ text: 'Поцелуй', correct: false },
-			{ text: 'Обещанный приз', correct: true },
-			{ text: 'Пицца', correct: false },
-			{ text: 'Книга', correct: false },
+			{ text: 'Дайсон', correct: false },
+			{ text: '---', correct: true },
+			{ text: 'Клетку', correct: false },
+			{ text: 'Стринги', correct: false },
 		],
 	},
 ]
@@ -126,6 +138,10 @@ const failPhrases = [
 	'Ну ты и лошара',
 	'Дурочка',
 ]
+
+// feedback gif pools
+const positiveFeedbackGifs = [icon10, gif1, gif4, gif5, gif7, gif11, gif13]
+const negativeFeedbackGifs = [gif19, gif14, gif15, gif16]
 
 export default function Page() {
 	const [scene, setScene] = useState<'intro' | 'game'>('intro')
@@ -228,6 +244,21 @@ function GameScene() {
 	)
 	const [feedbackMessage, setFeedbackMessage] = useState<string>('')
 
+	// audio refs for feedback sounds
+	const successRef = useRef<HTMLAudioElement | null>(null)
+	const failRef = useRef<HTMLAudioElement | null>(null)
+
+	// quiz progress
+	const [correctCount, setCorrectCount] = useState(0)
+	const [finished, setFinished] = useState(false)
+
+	// gif for current feedback and result
+	const [feedbackGif, setFeedbackGif] = useState<string | StaticImageData | null>(null)
+	const [resultGif, setResultGif] = useState<string | StaticImageData | null>(null)
+	// final result state (to avoid async timing issues with setState)
+	const [resultCount, setResultCount] = useState<number | null>(null)
+	const [resultSuccess, setResultSuccess] = useState<boolean | null>(null) 
+
 	// quiz is defined at module scope now
 
 	const current = quiz[currentQuestionIndex]
@@ -235,6 +266,58 @@ function GameScene() {
 	// phrases moved to module scope
 
 	const handleOpenQuiz = () => setShowQuestion(true)
+
+	const awayHandledRef = useRef(false)
+	const handleAway = useCallback(() => {
+		// mark as wrong if user hides or leaves page during a question
+		if (!showQuestion || finished) return
+		if (awayHandledRef.current) return
+		awayHandledRef.current = true
+
+		setFeedbackType('fail')
+		setFeedbackMessage('Куда пошла!!!')
+		const chosenGif = negativeFeedbackGifs[Math.floor(Math.random() * negativeFeedbackGifs.length)]
+		setFeedbackGif(chosenGif)
+		setShowFeedback(true)
+		// pause background music if playing
+		;(document.getElementById('bg-music') as HTMLAudioElement | null)?.pause()
+		failRef.current?.play()
+
+		// record in history
+		try {
+			const key = 'quizHistory'
+			const raw = localStorage.getItem(key)
+			const list = raw ? JSON.parse(raw) : []
+			list.push({
+				question: quiz[currentQuestionIndex].question,
+				chosen: 'ушёл',
+				correct: false,
+				timestamp: Date.now(),
+			})
+			localStorage.setItem(key, JSON.stringify(list))
+		} catch (e) {
+			console.warn('Could not write quiz history', e)
+		}
+
+		setTimeout(() => {
+			setShowFeedback(false)
+			awayHandledRef.current = false
+			if (currentQuestionIndex + 1 < quiz.length) {
+				setCurrentQuestionIndex(idx => idx + 1)
+			} else {
+				const finalCorrect = correctCount
+				const success = finalCorrect >= 7
+				const resultPool = success ? positiveFeedbackGifs : negativeFeedbackGifs
+				setResultGif(resultPool[Math.floor(Math.random() * resultPool.length)])
+				setResultCount(finalCorrect)
+				setResultSuccess(success)
+				setFeedbackGif(null)
+				setFinished(true)
+				setShowQuestion(false)
+			}
+		}, FEEDBACK_DURATION)
+	}, [showQuestion, finished, currentQuestionIndex, correctCount])
+
 	const handleAnswer = useCallback((i: number) => {
 		// ignore repeated clicks
 		if (selectedAnswer !== null) return
@@ -247,9 +330,21 @@ function GameScene() {
 		const phrases = correct ? successPhrases : failPhrases
 		const message = phrases[Math.floor(Math.random() * phrases.length)]
 
+		// choose random gif for feedback
+		const gifPool = correct ? positiveFeedbackGifs : negativeFeedbackGifs
+		const chosenGif = gifPool[Math.floor(Math.random() * gifPool.length)]
+
 		setFeedbackType(correct ? 'success' : 'fail')
 		setFeedbackMessage(message)
+		setFeedbackGif(chosenGif)
 		setShowFeedback(true)
+
+		if (correct) {
+			setCorrectCount(c => c + 1)
+			successRef.current?.play()
+		} else {
+			failRef.current?.play()
+		}
 
 		// save to localStorage
 		try {
@@ -271,10 +366,43 @@ function GameScene() {
 		setTimeout(() => {
 			setShowFeedback(false)
 			setSelectedAnswer(null)
-			// move to next question if available
-			setCurrentQuestionIndex(idx => (idx + 1 < quiz.length ? idx + 1 : idx))
-		}, 1400)
-	}, [selectedAnswer, currentQuestionIndex])
+			if (currentQuestionIndex + 1 < quiz.length) {
+				setCurrentQuestionIndex(idx => idx + 1)
+			} else {
+				// quiz finished — determine final result and show (use finalCorrect to avoid async setState timing issues)
+				const finalCorrect = correct ? correctCount + 1 : correctCount
+				const success = finalCorrect >= 7
+				const resultPool = success ? positiveFeedbackGifs : negativeFeedbackGifs
+				setResultGif(resultPool[Math.floor(Math.random() * resultPool.length)])
+				setResultCount(finalCorrect)
+				setResultSuccess(success)
+				// cleanup feedback gif and mark finished
+				setFeedbackGif(null)
+				setFinished(true)
+				setShowQuestion(false)
+			}
+		}, FEEDBACK_DURATION)
+	}, [selectedAnswer, currentQuestionIndex, correctCount])
+
+	// watch for user leaving/tab switch - count as an incorrect answer and show sad feedback
+	useEffect(() => {
+		function onHidden() {
+			if (document.hidden) handleAway()
+		}
+		function onBlur() {
+			handleAway()
+		}
+		window.addEventListener('visibilitychange', onHidden)
+		window.addEventListener('pagehide', onHidden)
+		window.addEventListener('blur', onBlur)
+		window.addEventListener('beforeunload', onHidden)
+		return () => {
+			window.removeEventListener('visibilitychange', onHidden)
+			window.removeEventListener('pagehide', onHidden)
+			window.removeEventListener('blur', onBlur)
+			window.removeEventListener('beforeunload', onHidden)
+		}
+	}, [handleAway])
 
 	return (
 		<motion.div
@@ -284,6 +412,9 @@ function GameScene() {
 			exit={{ opacity: 0 }}
 			transition={{ duration: 0.5, ease }}
 		>
+			{/* preload feedback sounds */}
+			<audio ref={successRef} src={successMp3} preload='auto' />
+			<audio ref={failRef} src={failMp3} preload='auto' />
 			{/* Заголовок по центру сверху (letter animation) */}
 			<motion.div
 				initial={{ y: -28, opacity: 0 }}
@@ -331,7 +462,19 @@ function GameScene() {
 				transition={{ delay: 0.25, duration: 0.7, ease }}
 				className='absolute left-1/2 top-20 transform -translate-x-1/2 z-30 w-180'
 			>
-				{!showQuestion ? (
+				{finished ? (
+					<div className={`rounded-3xl ${resultSuccess ? 'bg-green-500' : 'bg-red-500'} h-135 pt-10 mt-15 text-white shadow-2xl text-center w-lg mx-auto flex flex-col items-center justify-center` }>
+						{resultGif ? (
+							<Image src={resultGif} alt={resultSuccess ? 'success' : 'fail'} width={180} height={180} />
+						) : (
+							<Image src={resultSuccess ? icon10 : gif19} alt={resultSuccess ? 'success' : 'fail'} width={180} height={180} />
+						)}
+						<p className='mt-4 text-3xl font-extrabold'>
+							{resultSuccess ? 'Юху! Моя девочка 🎉' : 'Неудача — не хватило правильных ответов.'}
+						</p>
+						<p className='mt-2 text-xl'>Результат: {resultCount} / {quiz.length}</p>
+					</div>
+				) : !showQuestion ? (
 					<div className='rounded-3xl bg-red-400 h-135 pt-10 mt-15 text-white shadow-2xl text-center w-lg mx-auto relative'>
 						<p className='text-2xl leading-relaxed mx-auto font-bold w-4/5'>
 							Если ответишь правильно на 10 вопросов, получишь обещанный приз.
@@ -345,11 +488,10 @@ function GameScene() {
 							animate={{ y: 0, opacity: 1 }}
 							whileHover={{ scale: 1.18 }}
 							whileTap={{ scale: 0.98 }}
-							transition={{ duration: 0.6, ease }}
+						transition={{ duration: 0.9, ease }}
 							className='absolute left-1/2 transform -translate-x-1/2 top-[50%] z-30 cursor-pointer'
 							onClick={handleOpenQuiz}
 						>
-							{/* если у тебя есть стикер белого кота — подставь, иначе используем box */}
 							<Image src={centerGif} alt='cat box' width={220} height={140} />
 							<p className='text-xl leading-relaxed mx-auto font-bold w-4/5'>
 								Поехали!
@@ -374,9 +516,20 @@ function GameScene() {
 								</motion.button>
 							))}
 						</div>
+					<AnimatePresence mode='wait'>
 						{showFeedback && (
-							<div className='absolute inset-0 bg-red-400 rounded-3xl flex flex-col items-center justify-center z-50 p-4'>
-								{feedbackType === 'success' ? (
+							<motion.div
+								key='feedback'
+								initial={{ opacity: 0, scale: 0.92 }}
+								animate={{ opacity: 1, scale: 1 }}
+								exit={{ opacity: 0, scale: 0.96 }}
+								transition={{ duration: 0.45, ease: 'easeInOut' }}
+								className='absolute inset-0 rounded-3xl flex flex-col items-center justify-center z-50 p-4 pointer-events-none bg-transparent'
+							>
+								<div className='pointer-events-auto flex flex-col items-center justify-center'>
+								{feedbackGif ? (
+									<Image src={feedbackGif} alt={feedbackType ?? 'feedback'} width={160} height={160} />
+								) : feedbackType === 'success' ? (
 									<Image src={icon10} alt='success' width={96} height={96} />
 								) : (
 									<Image src={gif19} alt='fail' width={120} height={120} />
@@ -384,8 +537,10 @@ function GameScene() {
 								<p className='mt-4 text-2xl font-extrabold text-white'>
 									{feedbackMessage}
 								</p>
-							</div>
+								</div>
+							</motion.div>
 						)}
+					</AnimatePresence>
 					</div>
 				)}
 			</motion.div>
