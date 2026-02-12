@@ -5,7 +5,7 @@ git init
 git remote add origin https://github.com/username/repo-name.git
 
 git add .
-git commit -m "0.2"
+git commit -m "0.3 Готовый FSD"
 git push 
 
 
