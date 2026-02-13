@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import type { StaticImageData } from 'next/image'
 import { useQuiz } from '@/features/quiz'
-import { QuestionCard } from '@/widgets/quiz-card'
+import { QuestionCard, FinalQuizCard } from '@/widgets/quiz-card'
 import { FeedbackOverlay } from '@/features/feedback'
 import { QUIZ } from '@/features/quiz/model/quiz.data'
 import { AUDIO } from '@/shared/assets/audio'
@@ -25,6 +25,9 @@ export function GameScene() {
 		feedback,
 		resultGif,
 		resultSuccess,
+		checkLoading,
+		alreadyPassed,
+		previousResult,
 	} = useQuiz()
 	const [showQuestion, setShowQuestion] = useState(false)
 	const successRef = useRef<HTMLAudioElement | null>(null)
@@ -107,36 +110,14 @@ export function GameScene() {
 				transition={{ delay: 0.25, duration: 0.7, ease }}
 				className='absolute left-1/2 top-20 transform -translate-x-1/2 z-30 w-180'
 			>
-				{finished ? (
-					<div
-						className={`rounded-3xl ${resultSuccess ? 'bg-green-500' : 'bg-red-500'} h-135 pt-10 mt-15 text-white shadow-2xl text-center w-lg mx-auto flex flex-col items-center justify-center`}
-					>
-						{resultGif ? (
-							<Image
-								src={resultGif}
-								alt={resultSuccess ? 'success' : 'fail'}
-								width={180}
-								height={180}
-								unoptimized
-							/>
-						) : (
-							<Image
-								src={resultSuccess ? icon10 : gif19}
-								alt={resultSuccess ? 'success' : 'fail'}
-								width={180}
-								height={180}
-								unoptimized
-							/>
-						)}
-						<p className='mt-4 text-3xl font-extrabold'>
-							{resultSuccess
-								? 'Юху! Моя девочка 🎉'
-								: 'Неудача — не хватило правильных ответов.'}
-						</p>
-						<p className='mt-2 text-xl'>
-							Результат: {result} / {QUIZ.length}
-						</p>
+				{checkLoading ? (
+					<div className='rounded-3xl bg-red-400 h-135 pt-10 mt-15 text-white shadow-2xl text-center w-lg mx-auto flex flex-col items-center justify-center'>
+						<p className='text-xl font-bold'>Загрузка…</p>
 					</div>
+				) : alreadyPassed && previousResult ? (
+					<FinalQuizCard success={previousResult.success} />
+				) : finished ? (
+					<FinalQuizCard success={resultSuccess ?? false} />
 				) : !showQuestion ? (
 					<div className='rounded-3xl bg-red-400 h-135 pt-10 mt-15 text-white shadow-2xl text-center w-lg mx-auto relative'>
 						<p className='text-2xl leading-relaxed mx-auto font-bold w-4/5'>

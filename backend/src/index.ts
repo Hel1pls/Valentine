@@ -76,6 +76,25 @@ app.get('/api/health', (req: Request, res: Response) => {
 	})
 })
 
+// Проверка: проходил ли пользователь квиз (для показа сцены «уже пройден»)
+app.get('/api/quiz-results/check/:userId', async (req: Request, res: Response) => {
+	try {
+		const { userId } = req.params
+		if (!userId) return res.status(400).json({ error: 'userId required' })
+		const attempt = await QuizAttempt.findOne({ userId }).lean()
+		if (!attempt) return res.status(404).json({ error: 'notFound' })
+		return res.json({
+			passed: true,
+			success: !!attempt.success,
+			totalCorrect: attempt.totalCorrect,
+			totalQuestions: attempt.totalQuestions,
+		})
+	} catch (err) {
+		console.error(err)
+		return res.status(500).json({ error: 'Failed to check' })
+	}
+})
+
 // Приём результатов квиза
 app.post(
 	'/api/quiz-results',

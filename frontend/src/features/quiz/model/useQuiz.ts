@@ -56,6 +56,15 @@ export function useQuiz() {
 
 	const [locked, setLocked] = useState(false) // prevent repeated clicks while feedback shown
 
+	// проверка «уже проходил квиз» — показываем сцену «пройти нельзя»
+	const [checkLoading, setCheckLoading] = useState(true)
+	const [alreadyPassed, setAlreadyPassed] = useState(false)
+	const [previousResult, setPreviousResult] = useState<{
+		success: boolean
+		totalCorrect: number
+		totalQuestions: number
+	} | null>(null)
+
 	const successAudio = useRef<HTMLAudioElement | null>(null)
 	const failAudio = useRef<HTMLAudioElement | null>(null)
 
@@ -66,6 +75,44 @@ export function useQuiz() {
 		successAudio.current = new Audio(AUDIO.success)
 		failAudio.current = new Audio(AUDIO.fail)
 	}, [])
+
+	// при загрузке проверяем, проходил ли пользователь квиз
+	useEffect(() => {
+		if (!userId) {
+			queueMicrotask(() => setCheckLoading(false))
+			return
+		}
+		let cancelled = false
+		fetch(`${API_URL}/api/quiz-results/check/${encodeURIComponent(userId)}`)
+			.then(res => {
+				if (cancelled) return
+				if (res.ok) return res.json()
+				if (res.status === 404) {
+					setAlreadyPassed(false)
+					setPreviousResult(null)
+					return
+				}
+				throw new Error('Check failed')
+			})
+			.then((data: { passed?: boolean; success?: boolean; totalCorrect?: number; totalQuestions?: number } | void) => {
+				if (cancelled || !data) return
+				if (data.passed) {
+					setAlreadyPassed(true)
+					setPreviousResult({
+						success: !!data.success,
+						totalCorrect: data.totalCorrect ?? 0,
+						totalQuestions: data.totalQuestions ?? 0,
+					})
+				}
+			})
+			.catch(() => {
+				if (!cancelled) setAlreadyPassed(false)
+			})
+			.finally(() => {
+				if (!cancelled) setCheckLoading(false)
+			})
+		return () => { cancelled = true }
+	}, [userId])
 
 	const question = index < QUIZ.length ? QUIZ[index] : undefined
 
@@ -222,5 +269,8 @@ export function useQuiz() {
 		feedback,
 		resultSuccess,
 		resultGif,
+		checkLoading,
+		alreadyPassed,
+		previousResult,
 	}
 }

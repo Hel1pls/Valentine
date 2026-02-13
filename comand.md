@@ -5,7 +5,7 @@ git init
 git remote add origin https://github.com/username/repo-name.git
 
 git add .
-git commit -m "0.4 Реализация backend и админ панели"
+git commit -m "0.5 Финальная сцена"
 git push 
 
 
