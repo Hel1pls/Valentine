@@ -5,7 +5,7 @@ git init
 git remote add origin https://github.com/username/repo-name.git
 
 git add .
-git commit -m "0.6 Сервер настройка"
+git commit -m "0.61 Сервер настройка"
 git push 
 
 
@@ -49,6 +49,11 @@ Root-пароль
 
 ssh -i C:\Users\marat\.ssh\id_ed25519 root@212.193.26.58
    cd /root/valentines
+
+
+      git pull
+   docker compose down
+   docker compose up -d --build
 
 Адрес репозитория 
 cd /root

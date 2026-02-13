@@ -20,9 +20,18 @@ type QuizAttempt = {
 	createdAt: string
 }
 
+// Определяем адрес бэкенда в браузере:
+// - локально: http://localhost:4000
+// - на сервере (212.193.26.58:3001): http://212.193.26.58:4001
 const API_URL =
-	typeof process !== 'undefined' && process.env.NEXT_PUBLIC_API_URL
-		? process.env.NEXT_PUBLIC_API_URL
+	typeof window !== 'undefined'
+		? (() => {
+				const host = window.location.hostname
+				if (host === 'localhost' || host === '127.0.0.1') {
+					return 'http://localhost:4000'
+				}
+				return `http://${host}:4001`
+			})()
 		: 'http://localhost:4000'
 
 const AdminPage = () => {
