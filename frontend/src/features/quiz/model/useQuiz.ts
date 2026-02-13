@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { AUDIO } from '@/shared/assets/audio'
+import { AUDIO } from '@/shared/assets/audio/index'
 import {
 	QUIZ,
 	FEEDBACK_DURATION,
@@ -9,6 +9,19 @@ import {
 	negativeFeedbackGifs,
 } from './quiz.data'
 
+type AnswerRecord = {
+	questionId: number
+	question: string
+	optionId: number
+	chosenText: string
+	correct: boolean
+}
+
+const API_URL =
+	typeof process !== 'undefined' && process.env.NEXT_PUBLIC_API_URL
+		? process.env.NEXT_PUBLIC_API_URL
+		: 'http://localhost:4000'
+
 export function useQuiz() {
 	const [index, setIndex] = useState(0)
 	const [correct, setCorrect] = useState(0)
@@ -16,6 +29,24 @@ export function useQuiz() {
 	const [resultCount, setResultCount] = useState<number | null>(null)
 	const [resultSuccess, setResultSuccess] = useState<boolean | null>(null)
 	const [resultGif, setResultGif] = useState<string | null>(null)
+	const [userId] = useState<string | null>(() => {
+		if (typeof window === 'undefined') return null
+		try {
+			const key = 'quizUserId'
+			let stored = localStorage.getItem(key)
+			if (!stored) {
+				const random =
+					typeof crypto !== 'undefined' && 'randomUUID' in crypto
+						? crypto.randomUUID()
+						: `user_${Math.random().toString(36).slice(2)}`
+				stored = random
+				localStorage.setItem(key, stored)
+			}
+			return stored
+		} catch {
+			return null
+		}
+	})
 
 	const [feedback, setFeedback] = useState<null | {
 		type: 'success' | 'fail'
@@ -28,12 +59,37 @@ export function useQuiz() {
 	const successAudio = useRef<HTMLAudioElement | null>(null)
 	const failAudio = useRef<HTMLAudioElement | null>(null)
 
+	// текущие ответы держим в ref, чтобы всегда иметь актуальное значение
+	const answersRef = useRef<AnswerRecord[]>([])
+
 	useEffect(() => {
 		successAudio.current = new Audio(AUDIO.success)
 		failAudio.current = new Audio(AUDIO.fail)
 	}, [])
 
 	const question = index < QUIZ.length ? QUIZ[index] : undefined
+
+	const sendResults = useCallback(
+		async (finalCorrect: number) => {
+			if (!userId) return
+			try {
+				const payload = {
+					userId,
+					answers: answersRef.current,
+					totalCorrect: finalCorrect,
+					totalQuestions: QUIZ.length,
+				}
+				await fetch(`${API_URL}/api/quiz-results`, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(payload),
+				})
+			} catch (e) {
+				console.warn('Failed to send quiz results', e)
+			}
+		},
+		[userId],
+	)
 
 	const advance = useCallback(
 		(correctAnswered: boolean) => {
@@ -51,29 +107,16 @@ export function useQuiz() {
 			setResultCount(finalCorrect)
 			setResultSuccess(success)
 			setFinished(true)
+
+			// Отправляем результаты на бэкенд
+			void sendResults(finalCorrect)
 		},
-		[index, correct],
+		[index, correct, sendResults],
 	)
 
-	const saveHistory = useCallback(
-		(chosenText: string, isCorrect: boolean) => {
-			try {
-				const key = 'quizHistory'
-				const raw = localStorage.getItem(key)
-				const list = raw ? JSON.parse(raw) : []
-				list.push({
-					question: QUIZ[index].question,
-					chosen: chosenText,
-					correct: isCorrect,
-					timestamp: Date.now(),
-				})
-				localStorage.setItem(key, JSON.stringify(list))
-			} catch (e) {
-				console.warn('Could not write quiz history', e)
-			}
-		},
-		[index],
-	)
+	const recordAnswer = useCallback((entry: AnswerRecord) => {
+		answersRef.current.push(entry)
+	}, [])
 
 	const answer = useCallback(
 		(i: number) => {
@@ -83,6 +126,15 @@ export function useQuiz() {
 
 			const chosen = question.options[i]
 			const isCorrect = !!chosen.correct
+
+			// сохраняем подробный ответ для отправки на бэкенд
+			recordAnswer({
+				questionId: question.id,
+				question: question.question,
+				optionId: chosen.id,
+				chosenText: chosen.text,
+				correct: isCorrect,
+			})
 
 			const phrases = isCorrect ? successPhrases : failPhrases
 			const message = phrases[Math.floor(Math.random() * phrases.length)]
@@ -103,14 +155,12 @@ export function useQuiz() {
 				failAudio.current?.play()
 			}
 
-			saveHistory(chosen.text, isCorrect)
-
 			setTimeout(() => {
 				setFeedback(null)
 				advance(isCorrect)
 			}, FEEDBACK_DURATION)
 		},
-		[locked, finished, question, advance, saveHistory],
+		[locked, finished, question, advance],
 	)
 
 	// handle user leaving/tab switch — count as wrong
@@ -129,20 +179,13 @@ export function useQuiz() {
 		setFeedback({ type: 'fail', message, gif: chosenGif })
 		failAudio.current?.play()
 
-		try {
-			const key = 'quizHistory'
-			const raw = localStorage.getItem(key)
-			const list = raw ? JSON.parse(raw) : []
-			list.push({
-				question: QUIZ[index].question,
-				chosen: 'ушёл',
-				correct: false,
-				timestamp: Date.now(),
-			})
-			localStorage.setItem(key, JSON.stringify(list))
-		} catch (e) {
-			console.warn('Could not write quiz history', e)
-		}
+		recordAnswer({
+			questionId: QUIZ[index].id,
+			question: QUIZ[index].question,
+			optionId: -1,
+			chosenText: 'ушёл',
+			correct: false,
+		})
 
 		setTimeout(() => {
 			setFeedback(null)
