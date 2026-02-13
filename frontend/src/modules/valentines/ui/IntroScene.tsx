@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { TopCloud, BottomClouds } from '@/widgets/clouds'
 import Image from 'next/image'
@@ -16,20 +16,16 @@ type Props = {
 }
 
 export function IntroScene({ onStart }: Props) {
-	const audioRef = useRef<HTMLAudioElement>(null)
 	const [isExiting, setIsExiting] = useState(false)
 
 	const handleStart = () => {
 		if (isExiting) return
-		audioRef.current?.play()
 		setIsExiting(true)
 		setTimeout(onStart, EXIT_DELAY_MS)
 	}
 
 	return (
 		<div className='absolute inset-0 font-comfortaa'>
-			<audio ref={audioRef} src={AUDIO.love} />
-
 			{/* Верхние облака — улетают ВВЕРХ */}
 			<motion.div
 				className='absolute top-0 left-0 right-0 z-10'

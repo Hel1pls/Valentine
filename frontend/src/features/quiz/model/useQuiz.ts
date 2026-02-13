@@ -18,9 +18,20 @@ type AnswerRecord = {
 }
 
 const API_URL =
-	typeof process !== 'undefined' && process.env.NEXT_PUBLIC_API_URL
-		? process.env.NEXT_PUBLIC_API_URL
-		: 'http://localhost:4000'
+	typeof window !== 'undefined'
+		? // в браузере определяем URL бэкенда по хосту
+			(() => {
+				const host = window.location.hostname
+				// локальная разработка: фронт на 3000, бэкенд на 4000
+				if (host === 'localhost' || host === '127.0.0.1') {
+					return 'http://localhost:4000'
+				}
+				// прод: фронт на 212.193.26.58:3001, бэкенд на 212.193.26.58:4001
+				return `http://${host}:4001`
+			})()
+		: // на сервере можно fallback к переменной окружения
+		  (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_API_URL) ||
+		  'http://localhost:4000'
 
 export function useQuiz() {
 	const [index, setIndex] = useState(0)

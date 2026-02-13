@@ -13,9 +13,9 @@ const MONGO_URL =
 // Позволяет Express понимать JSON в теле запросов
 app.use(express.json())
 
-// Простейший CORS, чтобы фронт на 3000 порту мог дергать API
+// Простейший CORS: разрешаем запросы с любых origin (мы не используем куки)
 app.use((req, res, next) => {
-	res.header('Access-Control-Allow-Origin', 'http://localhost:3000')
+	res.header('Access-Control-Allow-Origin', '*')
 	res.header('Access-Control-Allow-Methods', 'GET,POST,DELETE,OPTIONS')
 	res.header('Access-Control-Allow-Headers', 'Content-Type')
 

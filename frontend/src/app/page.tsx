@@ -12,6 +12,7 @@ export default function Page() {
 	const audioRef = useRef<HTMLAudioElement | null>(null)
 
 	const handleStart = () => {
+		audioRef.current?.play()
 		setScene('game')
 	}
 
