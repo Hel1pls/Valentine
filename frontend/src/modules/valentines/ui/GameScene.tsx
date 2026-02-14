@@ -120,7 +120,7 @@ export function GameScene() {
 					<FinalQuizCard success={resultSuccess ?? false} />
 				) : !showQuestion ? (
 					<div className='rounded-3xl bg-red-400 h-135 pt-10 mt-15 text-white shadow-2xl text-center w-lg mx-auto relative'>
-						<p className='text-2xl leading-relaxed mx-auto font-bold w-4/5'>
+						<p className='text-xl leading-relaxed mx-auto font-bold w-4/5'>
 							Если ответишь правильно на 10 вопросов, получишь обещанный приз
 							<br />
 							Если ошибёшься три раза — ничего не получишь.

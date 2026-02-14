@@ -5,7 +5,7 @@ git init
 git remote add origin https://github.com/username/repo-name.git
 
 git add .
-git commit -m "0.62 Сервер настройка"
+git commit -m "0.63 Финал"
 git push 
 
 
@@ -56,6 +56,6 @@ ssh -i C:\Users\marat\.ssh\id_ed25519 root@212.193.26.58
    docker compose up -d --build
 
 Адрес репозитория 
-cd /root
+
 git clone https://github.com/Hel1pls/Valentine.git valentines
 cd /root/valentines

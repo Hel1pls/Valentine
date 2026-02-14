@@ -30,8 +30,8 @@ const API_URL =
 				return `http://${host}:4001`
 			})()
 		: // на сервере можно fallback к переменной окружения
-		  (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_API_URL) ||
-		  'http://localhost:4000'
+			(typeof process !== 'undefined' && process.env.NEXT_PUBLIC_API_URL) ||
+			'http://localhost:4000'
 
 export function useQuiz() {
 	const [index, setIndex] = useState(0)
@@ -105,24 +105,35 @@ export function useQuiz() {
 				}
 				throw new Error('Check failed')
 			})
-			.then((data: { passed?: boolean; success?: boolean; totalCorrect?: number; totalQuestions?: number } | void) => {
-				if (cancelled || !data) return
-				if (data.passed) {
-					setAlreadyPassed(true)
-					setPreviousResult({
-						success: !!data.success,
-						totalCorrect: data.totalCorrect ?? 0,
-						totalQuestions: data.totalQuestions ?? 0,
-					})
-				}
-			})
+			.then(
+				(
+					data: {
+						passed?: boolean
+						success?: boolean
+						totalCorrect?: number
+						totalQuestions?: number
+					} | void,
+				) => {
+					if (cancelled || !data) return
+					if (data.passed) {
+						setAlreadyPassed(true)
+						setPreviousResult({
+							success: !!data.success,
+							totalCorrect: data.totalCorrect ?? 0,
+							totalQuestions: data.totalQuestions ?? 0,
+						})
+					}
+				},
+			)
 			.catch(() => {
 				if (!cancelled) setAlreadyPassed(false)
 			})
 			.finally(() => {
 				if (!cancelled) setCheckLoading(false)
 			})
-		return () => { cancelled = true }
+		return () => {
+			cancelled = true
+		}
 	}, [userId])
 
 	const question = index < QUIZ.length ? QUIZ[index] : undefined
@@ -229,7 +240,7 @@ export function useQuiz() {
 		awayHandled.current = true
 		setLocked(true)
 
-		const message = failPhrases[Math.floor(Math.random() * failPhrases.length)]
+		const message = 'ты куда'
 		const chosenGif =
 			negativeFeedbackGifs[
 				Math.floor(Math.random() * negativeFeedbackGifs.length)
@@ -241,7 +252,7 @@ export function useQuiz() {
 			questionId: QUIZ[index].id,
 			question: QUIZ[index].question,
 			optionId: -1,
-			chosenText: 'ушёл',
+			chosenText: 'ушла',
 			correct: false,
 		})
 
