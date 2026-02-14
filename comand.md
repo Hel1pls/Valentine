@@ -5,7 +5,7 @@ git init
 git remote add origin https://github.com/username/repo-name.git
 
 git add .
-git commit -m "0.61 Сервер настройка"
+git commit -m "0.62 Сервер настройка"
 git push 
 
 

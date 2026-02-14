@@ -121,11 +121,11 @@ export function GameScene() {
 				) : !showQuestion ? (
 					<div className='rounded-3xl bg-red-400 h-135 pt-10 mt-15 text-white shadow-2xl text-center w-lg mx-auto relative'>
 						<p className='text-2xl leading-relaxed mx-auto font-bold w-4/5'>
-							Если ответишь правильно на 10 вопросов, получишь обещанный приз.
+							Если ответишь правильно на 10 вопросов, получишь обещанный приз
 							<br />
-							Если ошибёшься два раза — ничего не получишь.
+							Если ошибёшься три раза — ничего не получишь.
 							<br />
-							Не волнуйся — он не вылезет.
+							Не волнуйся приз не вылезет на пол экрана.
 						</p>
 						<motion.div
 							initial={{ y: 20, opacity: 0 }}
